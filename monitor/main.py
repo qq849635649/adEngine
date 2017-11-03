@@ -21,7 +21,7 @@ define("port", default=8000, help="run on the given port", type=int)
 class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
-            (r"/log/showLog", LogHandler),
+            (r"/log/showLog", LogHandler, dict(logType="show", redis="192.168.1.3:7030")),
         ]
         settings = {'cookie_secret':'geewise', 'gzip':True}
         tornado.web.Application.__init__(self, handlers, **settings)
