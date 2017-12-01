@@ -7,6 +7,7 @@ import tornado.ioloop
 import tornado.web
 import tornado.options
 from tornado.options import define, options
+from tornado.ioloop import PeriodicCallback
 
 # system module
 import logging
@@ -15,16 +16,30 @@ import os
 #own module
 from util.Constants import *
 from handler.handler import LogHandler
+from util.MySQLUtil import syncMySQL
 
 define("port", default=8000, help="run on the given port", type=int)
 
 class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
-            (r"/log/showLog", LogHandler, dict(logType="show", redis="192.168.1.3:7030")),
+            (r"/log/showLog", LogHandler, dict(logType="show", redis=REDIS_CONF)),
         ]
         settings = {'cookie_secret':'geewise', 'gzip':True}
         tornado.web.Application.__init__(self, handlers, **settings)
+
+        def periodSynchLM():
+            print 'aaa'
+            syncMySQL()
+        
+        # peroid get data from mysql
+        periodSynchLM()
+
+        # timeout
+        pc = PeriodicCallback(periodSynchLM, 120000)
+        pc.start()
+
+    
 
 def main():
     tornado.options.options.logging = "WARNING"
